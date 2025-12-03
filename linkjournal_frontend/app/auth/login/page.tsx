@@ -17,25 +17,33 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    setMessage("");
-    setLoading(true);
+const handleLogin = async () => {
+  setMessage("");
+  setLoading(true);
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setMessage("Login successful!");
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-      // Redirect after success
-      setTimeout(() => {
-        router.push("/");
-      }, 700);
+    // 🔥 Get Firebase JWT Token
+    const token = await user.getIdToken();
 
-    } catch (err: any) {
-      setMessage("Invalid email or password.");
-    }
+    console.log("Firebase JWT Token:", token);
 
-    setLoading(false);
-  };
+    setMessage("Login successful!");
+
+    // Redirect after success
+    setTimeout(() => {
+      router.push("/");
+    }, 700);
+
+  } catch (err: any) {
+    setMessage("Invalid email or password.");
+  }
+
+  setLoading(false);
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F4F7FE] px-4">

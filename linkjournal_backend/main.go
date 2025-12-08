@@ -43,6 +43,27 @@ type LinkJournal struct {
 	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
 }
 
+// ======================= CORS MIDDLEWARE =========================
+
+// 🔥 This fixes your CORS error by allowing requests from localhost:3000
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Replace "http://localhost:3000" with "*" if you want to allow ANY frontend to connect
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
+		// Handle the Browser's Preflight OPTIONS request
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 // ======================= TOPIC CONTROLLERS =========================
 
 // Create Topic (Uses Firebase UID)
@@ -72,7 +93,6 @@ func CreateTopic(c *gin.Context, col *mongo.Collection) {
 
 	_, err := col.InsertOne(context.TODO(), topic)
 	if err != nil {
-		// 🔥 DEBUGGING: Print the specific MongoDB error to the console
 		fmt.Printf("❌ MongoDB Topic Insert Error: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "DB Error: " + err.Error()})
 		return
@@ -96,7 +116,7 @@ func GetUserTopics(c *gin.Context, col *mongo.Collection) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error parsing topics"})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, topics)
 }
 
@@ -138,7 +158,6 @@ func CreateJournal(c *gin.Context, col *mongo.Collection) {
 
 	_, err = col.InsertOne(context.TODO(), journal)
 	if err != nil {
-		// 🔥 DEBUGGING: Print the specific MongoDB error
 		fmt.Printf("❌ MongoDB Journal Insert Error: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "DB Error: " + err.Error()})
 		return
@@ -282,6 +301,9 @@ func main() {
 	InitFirebase()
 
 	r := gin.Default()
+
+	// 🔥 APPLY CORS MIDDLEWARE HERE (Must be before routes)
+	r.Use(CORSMiddleware())
 
 	TopicRoutes(r, DB)
 	JournalRoutes(r, DB)

@@ -25,7 +25,7 @@ const getAuthToken = async (): Promise<string | undefined> => {
 
 // 1. Define the baseQuery with Authentication setup
 const baseQuery = fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://linkjournal-3.onrender.com/api',
     
     prepareHeaders: async (headers, { getState }) => {
         const token = await getAuthToken();
@@ -90,7 +90,7 @@ export const apiSlice = createApi({
 
         // ================== TOPIC ENDPOINTS ==================
         getTopics: builder.query<Topic[], void>({
-            query: () => '/api/topics',
+            query: () => 'api/topics',
             providesTags: (result) =>
                 result
                     ? [

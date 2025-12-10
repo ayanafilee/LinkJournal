@@ -25,7 +25,7 @@ const getAuthToken = async (): Promise<string | undefined> => {
 
 // 1. Define the baseQuery with Authentication setup
 const baseQuery = fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://linkjournal-3.onrender.com/api',
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://linkjournal-3.onrender.com',
     
     prepareHeaders: async (headers, { getState }) => {
         const token = await getAuthToken();

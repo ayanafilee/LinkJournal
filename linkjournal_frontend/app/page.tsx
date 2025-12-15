@@ -34,7 +34,7 @@ export default function HomePage() {
     );
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-amber-700">
       <h1 className="text-2xl font-bold mb-4">Topic Manager</h1>
 
       <form onSubmit={handleCreateTopic} className="mb-8 flex gap-2">

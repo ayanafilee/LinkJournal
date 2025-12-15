@@ -102,7 +102,7 @@ export const apiSlice = createApi({
 
         createTopic: builder.mutation<Topic, CreateTopicRequest>({
             query: (newTopic) => ({
-                url: '/topics',
+                url: 'api/topics',
                 method: 'POST',
                 body: newTopic,
             }),

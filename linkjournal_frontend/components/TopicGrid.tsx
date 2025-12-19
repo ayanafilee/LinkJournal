@@ -55,7 +55,7 @@ const TopicGrid: React.FC<TopicGridProps> = ({
               whitespace-nowrap
             "
           >
-            Add New Link
+            Add New Topic
           </button>
         </form>
       </div>

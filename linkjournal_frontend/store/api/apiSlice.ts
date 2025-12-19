@@ -111,7 +111,7 @@ export const apiSlice = createApi({
 
         // ================== JOURNAL ENDPOINTS ==================
         getJournals: builder.query<LinkJournal[], void>({
-            query: () => '/journals',
+            query: () => 'api/journals',
             providesTags: (result) =>
                 result
                     ? [
@@ -122,13 +122,13 @@ export const apiSlice = createApi({
         }),
 
         getJournalById: builder.query<LinkJournal, ObjectId>({
-            query: (id) => `/journal/${id}`,
+            query: (id) => `api/journal/${id}`,
             providesTags: (result, error, id) => [{ type: 'Journal', id }],
         }),
 
         createJournal: builder.mutation<LinkJournal, CreateJournalRequest>({
             query: (newJournal) => ({
-                url: '/journals',
+                url: 'api/journals',
                 method: 'POST',
                 body: newJournal,
             }),
@@ -163,7 +163,7 @@ export const apiSlice = createApi({
             ObjectId
         >({
             query: (id) => ({
-                url: `/journal/${id}/important`,
+                url: `api/journal/${id}/important`,
                 method: 'PUT',
             }),
             // Optimistic update logic

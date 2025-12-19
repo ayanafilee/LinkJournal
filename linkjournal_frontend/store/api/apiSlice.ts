@@ -1,4 +1,4 @@
-// store/api/apiSlice.ts (FINAL CODE)
+// store/api/apiSlice.ts (UPDATED)
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store'; 
@@ -6,82 +6,38 @@ import {
     Topic, LinkJournal, CreateTopicRequest, CreateJournalRequest, UpdateJournalRequest, ObjectId,
 } from '@/types/index';
 
-// 💡 The key must match the key used in useFirebaseAuthToken.ts
 const FIREBASE_TOKEN_KEY = 'firebaseIdToken'; 
 
 const getAuthToken = async (): Promise<string | undefined> => {
-    // Ensure we're in the browser environment
-    if (typeof window === 'undefined') {
-        return undefined;
-    }
-    
-    // Reads the token set by the useFirebaseAuthToken hook
+    if (typeof window === 'undefined') return undefined;
     const token = localStorage.getItem(FIREBASE_TOKEN_KEY);
-    
-    // Return undefined if token is null or empty string
     return token && token.trim() !== '' ? token : undefined;
 };
 
-
-// 1. Define the baseQuery with Authentication setup
 const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://linkjournal-3.onrender.com',
-    
-    prepareHeaders: async (headers, { getState }) => {
+    prepareHeaders: async (headers) => {
         const token = await getAuthToken();
-
         if (token) {
             headers.set('Authorization', `Bearer ${token}`);
-            console.log('🔑 Token attached to request:', token.substring(0, 20) + '...');
-        } else {
-            console.warn('⚠️ No token found in localStorage');
         }
-
         headers.set('Content-Type', 'application/json');
         return headers;
     },
 });
 
-// Wrap baseQuery with error logging and better error messages
 const baseQueryWithErrorHandling = async (args: any, api: any, extraOptions: any) => {
     try {
         const result = await baseQuery(args, api, extraOptions);
-        
-        // Log errors for debugging
         if (result.error) {
-            if (result.error.status === 'FETCH_ERROR') {
-                console.error('❌ Network/CORS Error:', {
-                    message: 'Failed to fetch - Check CORS configuration on backend',
-                    url: args?.url || 'unknown',
-                    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://linkjournal-3.onrender.com/api',
-                    error: result.error,
-                });
-                console.error('💡 Backend CORS must allow:');
-                console.error('   - Origin: http://localhost:3000');
-                console.error('   - Headers: Authorization, Content-Type');
-                console.error('   - Methods: GET, POST, PUT, DELETE, OPTIONS');
-            } else {
-                console.error('❌ API Error:', {
-                    status: result.error.status,
-                    data: result.error.data,
-                    error: result.error,
-                });
-            }
+            console.error('❌ API Error:', result.error);
         }
-        
         return result;
     } catch (error) {
-        console.error('❌ Unexpected error in baseQuery:', error);
-        return {
-            error: {
-                status: 'FETCH_ERROR',
-                error: String(error),
-            },
-        };
+        return { error: { status: 'FETCH_ERROR', error: String(error) } };
     }
 };
 
-// 2. Define the main API slice
 export const apiSlice = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithErrorHandling,
@@ -100,6 +56,12 @@ export const apiSlice = createApi({
                     : [{ type: 'Topic', id: 'LIST' }],
         }),
 
+        // 1. Get Topic Name by ID
+        getTopicById: builder.query<{ name: string }, ObjectId>({
+            query: (id) => `api/topics/${id}`,
+            providesTags: (result, error, id) => [{ type: 'Topic', id }],
+        }),
+
         createTopic: builder.mutation<Topic, CreateTopicRequest>({
             query: (newTopic) => ({
                 url: 'api/topics',
@@ -107,6 +69,42 @@ export const apiSlice = createApi({
                 body: newTopic,
             }),
             invalidatesTags: [{ type: 'Topic', id: 'LIST' }],
+        }),
+
+        // 2. Edit Topic
+        updateTopic: builder.mutation<
+            { message: string },
+            { id: ObjectId; name: string }
+        >({
+            query: ({ id, name }) => ({
+                url: `api/topics/${id}`,
+                method: 'PUT',
+                body: { name },
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'Topic', id },
+                { type: 'Topic', id: 'LIST' },
+            ],
+        }),
+
+        // 3. Delete Topic
+        deleteTopic: builder.mutation<{ message: string }, ObjectId>({
+            query: (id) => ({
+                url: `api/topics/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: [{ type: 'Topic', id: 'LIST' }],
+        }),
+
+        getJournalsByTopic: builder.query<LinkJournal[], ObjectId>({
+            query: (topicId) => `api/topics/${topicId}/journals`,
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.map(({ id }) => ({ type: 'Journal' as const, id })),
+                        { type: 'Journal', id: 'TOPIC_LIST' },
+                    ]
+                    : [{ type: 'Journal', id: 'TOPIC_LIST' }],
         }),
 
         // ================== JOURNAL ENDPOINTS ==================
@@ -140,7 +138,7 @@ export const apiSlice = createApi({
             { id: ObjectId; updates: UpdateJournalRequest }
         >({
             query: ({ id, updates }) => ({
-                url: `/journal/${id}`,
+                url: `api/journal/${id}`,
                 method: 'PUT',
                 body: updates,
             }),
@@ -152,7 +150,7 @@ export const apiSlice = createApi({
 
         deleteJournal: builder.mutation<{ message: string }, ObjectId>({
             query: (id) => ({
-                url: `/journal/${id}`,
+                url: `api/journal/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: [{ type: 'Journal', id: 'LIST' }],
@@ -166,7 +164,6 @@ export const apiSlice = createApi({
                 url: `api/journal/${id}/important`,
                 method: 'PUT',
             }),
-            // Optimistic update logic
             async onQueryStarted(id, { dispatch, queryFulfilled }) {
                 const patchResult = dispatch(
                     apiSlice.util.updateQueryData('getJournals', undefined, (draft) => {
@@ -187,10 +184,14 @@ export const apiSlice = createApi({
     }),
 });
 
-// 3. Export the auto-generated, typed hooks
+// Export the hooks
 export const {
     useGetTopicsQuery,
+    useGetTopicByIdQuery,    // <--- New
     useCreateTopicMutation,
+    useUpdateTopicMutation, // <--- New
+    useDeleteTopicMutation, // <--- New
+    useGetJournalsByTopicQuery,
     useGetJournalsQuery,
     useGetJournalByIdQuery,
     useCreateJournalMutation,

@@ -1,8 +1,12 @@
+"use client";
+
 import React from "react";
 import TopicCard from "./TopicCard";
 
 interface Topic {
-  id: number;
+  // Use string because MongoDB/ObjectIds are strings 
+  // and match this with your TopicCard id: string prop
+  id: string; 
   name: string;
 }
 
@@ -61,18 +65,13 @@ const TopicGrid: React.FC<TopicGridProps> = ({
       </div>
 
       {/* Topic Grid */}
-      <div
-        className="
-          grid
-          gap-6
-          grid-cols-1
-          sm:grid-cols-2
-          md:grid-cols-3
-          lg:grid-cols-3
-        "
-      >
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
         {topics.map((topic) => (
-          <TopicCard key={topic.id} topicName={topic.name} />
+          <TopicCard 
+            key={topic.id} 
+            id={topic.id} // <--- THIS WAS MISSING
+            topicName={topic.name} 
+          />
         ))}
       </div>
 

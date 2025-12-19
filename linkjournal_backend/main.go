@@ -330,15 +330,49 @@ func ToggleImportant(c *gin.Context, col *mongo.Collection) {
 	c.JSON(http.StatusOK, gin.H{"message": "Updated importance", "isImportant": newVal})
 }
 
+// NEW: Get all journals for a specific topic
+func GetJournalsByTopic(c *gin.Context, col *mongo.Collection) {
+	uid := c.GetString("uid")
+	topicIdHex := c.Param("id")
+
+	topicObjID, err := primitive.ObjectIDFromHex(topicIdHex)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Topic ID format"})
+		return
+	}
+
+	// Filter by both topic_id AND user_id for security
+	filter := bson.M{
+		"topic_id": topicObjID,
+		"user_id":  uid,
+	}
+
+	cursor, err := col.Find(context.TODO(), filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching journals for this topic"})
+		return
+	}
+
+	var journals []LinkJournal = []LinkJournal{}
+	if err = cursor.All(context.TODO(), &journals); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error parsing journals"})
+		return
+	}
+
+	c.JSON(http.StatusOK, journals)
+}
 // ======================= ROUTES =========================
 
 func TopicRoutes(r *gin.Engine, db *mongo.Database) {
 	col := db.Collection("topics")
+	journalCol := db.Collection("journals") // Need journals collection for the nested route
 	r.POST("/api/topics", AuthMiddleware(), func(c *gin.Context) { CreateTopic(c, col) })
 	r.GET("/api/topics", AuthMiddleware(), func(c *gin.Context) { GetUserTopics(c, col) })
 	r.GET("/api/topics/:id", AuthMiddleware(), func(c *gin.Context) { GetTopicByID(c, col) })
 	r.PUT("/api/topics/:id", AuthMiddleware(), func(c *gin.Context) { UpdateTopic(c, col) })
 	r.DELETE("/api/topics/:id", AuthMiddleware(), func(c *gin.Context) { DeleteTopic(c, col) })
+	r.GET("/api/topics/:id/journals", AuthMiddleware(), func(c *gin.Context) { GetJournalsByTopic(c, journalCol) })
+	
 }
 
 func JournalRoutes(r *gin.Engine, db *mongo.Database) {

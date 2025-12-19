@@ -120,6 +120,87 @@ func GetUserTopics(c *gin.Context, col *mongo.Collection) {
 	c.JSON(http.StatusOK, topics)
 }
 
+// Get topic name by ID
+func GetTopicByID(c *gin.Context, col *mongo.Collection) {
+	idHex := c.Param("id")
+	id, err := primitive.ObjectIDFromHex(idHex)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Topic ID format"})
+		return
+	}
+
+	var topic Topic
+	err = col.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&topic)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Topic not found"})
+		return
+	}
+
+	// Returning just the name as requested, but you could return the whole object
+	c.JSON(http.StatusOK, gin.H{"name": topic.Name})
+}
+
+// Update Topic Name
+func UpdateTopic(c *gin.Context, col *mongo.Collection) {
+	uid := c.GetString("uid")
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
+	var body struct {
+		Name string `json:"name"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// Update only if it belongs to the user
+	result, err := col.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": id, "user_id": uid},
+		bson.M{"$set": bson.M{"name": body.Name}},
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update topic"})
+		return
+	}
+
+	if result.MatchedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Topic not found or unauthorized"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Topic updated successfully"})
+}
+
+// Delete Topic
+func DeleteTopic(c *gin.Context, col *mongo.Collection) {
+	uid := c.GetString("uid")
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
+	// Delete the topic only if it belongs to the user
+	result, err := col.DeleteOne(context.TODO(), bson.M{"_id": id, "user_id": uid})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete topic"})
+		return
+	}
+
+	if result.DeletedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Topic not found or unauthorized"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Topic deleted successfully"})
+}
+
 // ======================= JOURNAL CONTROLLERS =========================
 
 func CreateJournal(c *gin.Context, col *mongo.Collection) {
@@ -255,6 +336,9 @@ func TopicRoutes(r *gin.Engine, db *mongo.Database) {
 	col := db.Collection("topics")
 	r.POST("/api/topics", AuthMiddleware(), func(c *gin.Context) { CreateTopic(c, col) })
 	r.GET("/api/topics", AuthMiddleware(), func(c *gin.Context) { GetUserTopics(c, col) })
+	r.GET("/api/topics/:id", AuthMiddleware(), func(c *gin.Context) { GetTopicByID(c, col) })
+	r.PUT("/api/topics/:id", AuthMiddleware(), func(c *gin.Context) { UpdateTopic(c, col) })
+	r.DELETE("/api/topics/:id", AuthMiddleware(), func(c *gin.Context) { DeleteTopic(c, col) })
 }
 
 func JournalRoutes(r *gin.Engine, db *mongo.Database) {

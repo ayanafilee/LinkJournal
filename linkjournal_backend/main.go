@@ -43,6 +43,15 @@ type LinkJournal struct {
 	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
 }
 
+type User struct {
+	ID             primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	FirebaseUID    string             `bson:"firebase_uid" json:"firebase_uid"`
+	Email          string             `bson:"email" json:"email"`
+	DisplayName    string             `bson:"display_name" json:"display_name"`
+	ProfilePicture string             `bson:"profile_picture" json:"profile_picture"`
+	CreatedAt      time.Time          `bson:"created_at" json:"created_at"`
+}
+
 // ======================= CORS MIDDLEWARE =========================
 
 // 🔥 This fixes your CORS error by allowing requests from localhost:3000
@@ -62,6 +71,97 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// ======================= USER PROFILE CONTROLLER =========================
+func CreateUser(c *gin.Context, col *mongo.Collection) {
+	var body struct {
+		FirebaseUID string `json:"firebase_uid"`
+		Email       string `json:"email"`
+		DisplayName string `json:"display_name"`
+	}
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Check if user already exists
+	count, _ := col.CountDocuments(context.TODO(), bson.M{"firebase_uid": body.FirebaseUID})
+	if count > 0 {
+		c.JSON(http.StatusConflict, gin.H{"message": "User already exists"})
+		return
+	}
+
+	newUser := User{
+		ID:             primitive.NewObjectID(),
+		FirebaseUID:    body.FirebaseUID,
+		Email:          body.Email,
+		DisplayName:    body.DisplayName,
+		ProfilePicture: "", // Placeholder for later
+		CreatedAt:      time.Now(),
+	}
+
+	_, err := col.InsertOne(context.TODO(), newUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save user"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, newUser)
+}
+
+// GetUserProfile: Uses the UID from the AuthMiddleware
+func GetUserProfile(c *gin.Context, col *mongo.Collection) {
+	uid := c.GetString("uid") // Taken from AuthMiddleware
+
+	var user User
+	err := col.FindOne(context.TODO(), bson.M{"firebase_uid": uid}).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User profile not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+// UpdateProfilePicture: Updates the user's profile image URL
+func UpdateProfilePicture(c *gin.Context, col *mongo.Collection) {
+	uid := c.GetString("uid") // Taken from AuthMiddleware
+
+	var body struct {
+		ProfilePicture string `json:"profile_picture"`
+	}
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	if body.ProfilePicture == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Profile picture URL is required"})
+		return
+	}
+
+	// Update the profile_picture field in MongoDB for this Firebase UID
+	filter := bson.M{"firebase_uid": uid}
+	update := bson.M{"$set": bson.M{"profile_picture": body.ProfilePicture}}
+
+	result, err := col.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile picture"})
+		return
+	}
+
+	if result.MatchedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":         "Profile picture updated successfully",
+		"profile_picture": body.ProfilePicture,
+	})
 }
 
 // ======================= TOPIC CONTROLLERS =========================
@@ -372,7 +472,7 @@ func TopicRoutes(r *gin.Engine, db *mongo.Database) {
 	r.PUT("/api/topics/:id", AuthMiddleware(), func(c *gin.Context) { UpdateTopic(c, col) })
 	r.DELETE("/api/topics/:id", AuthMiddleware(), func(c *gin.Context) { DeleteTopic(c, col) })
 	r.GET("/api/topics/:id/journals", AuthMiddleware(), func(c *gin.Context) { GetJournalsByTopic(c, journalCol) })
-	
+
 }
 
 func JournalRoutes(r *gin.Engine, db *mongo.Database) {
@@ -386,6 +486,16 @@ func JournalRoutes(r *gin.Engine, db *mongo.Database) {
 	r.PUT("/api/journal/:id/important", AuthMiddleware(), func(c *gin.Context) { ToggleImportant(c, col) })
 }
 
+func UserRoutes(r *gin.Engine, db *mongo.Database) {
+	col := db.Collection("users")
+
+	// Endpoint to save user data after signup (public or auth-protected depending on flow)
+	r.POST("/api/users/signup", func(c *gin.Context) { CreateUser(c, col) })
+
+	// Endpoint to get current user info (protected)
+	r.GET("/api/users/me", AuthMiddleware(), func(c *gin.Context) { GetUserProfile(c, col) })
+	r.PUT("/api/users/profile-picture", AuthMiddleware(), func(c *gin.Context) { UpdateProfilePicture(c, col) })
+}
 // ======================= MAIN =========================
 
 func main() {
@@ -425,6 +535,7 @@ func main() {
 
 	TopicRoutes(r, DB)
 	JournalRoutes(r, DB)
+	UserRoutes(r, DB)
 
 	port := os.Getenv("PORT")
 	if port == "" {

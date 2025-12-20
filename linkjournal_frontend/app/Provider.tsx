@@ -14,11 +14,10 @@ export function ReduxProvider({ children }: { children: React.ReactNode }) {
 
   // Wait for Firebase to initialize and check for the user/token state
   if (loading) {
-    // You can replace this with a proper loading spinner component
     return (
-        <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2em' }}>
-            Initializing App & Authentication...
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+      </div>
     );
   }
 

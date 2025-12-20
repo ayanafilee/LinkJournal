@@ -6,9 +6,11 @@ import { auth } from "@/firebase/clientApp";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
+import { useSignupUserMutation } from "@/store/api/apiSlice"; // Added this
 
 export default function SignupPage() {
   const router = useRouter();
+  const [signupUser] = useSignupUserMutation(); // Added this
   
   // Form State
   const [firstName, setFirstName] = useState("");
@@ -88,46 +90,51 @@ export default function SignupPage() {
   };
 
   // --- Handler ---
-  const handleSignup = async () => {
-    // 1. Run Validation
+const handleSignup = async () => {
     if (!validateForm()) {
       toast.error("Please fix the errors in the form.");
       return;
     }
 
     setLoading(true);
+    let userCredential; // Define outside to use in catch if needed
 
     try {
-      // 2. Create User
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // 1. Create User in Firebase
+      userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
+      try {
+        // 2. Sync with MongoDB (Nested try-catch to handle DB failure specifically)
+        await signupUser({
+          firebase_uid: userCredential.user.uid,
+          email: userCredential.user.email!,
+          display_name: `${firstName} ${lastName}`,
+          profile_picture: "", 
+        }).unwrap();
+      } catch (dbError) {
+        // IF DATABASE FAILS: Delete the firebase user so they can try again
+        await userCredential.user.delete();
+        throw new Error("Database sync failed. Please try again.");
+      }
+
       // 3. Send Verification Email
       await sendEmailVerification(userCredential.user);
 
-      // 4. Success Toast
-      toast.success("Account created! Redirecting...", {
-        duration: 2000,
-      });
+      toast.success("Account created! Redirecting...", { duration: 2000 });
 
-      // 5. Redirect
       setTimeout(() => {
-        router.push(`/auth/signup/verify_email?email=${encodeURIComponent(email)}`);
+        router.push("/");
       }, 1500);
 
     } catch (err: any) {
-      // Handle Firebase Errors (No console logs)
+      // Handles both Firebase errors and our custom Database error
       const errorCode = err.code;
 
       if (errorCode === 'auth/email-already-in-use') {
         setEmailError("This email is already in use.");
         toast.error("Email already registered.");
-      } else if (errorCode === 'auth/weak-password') {
-        setPasswordError("Password is too weak.");
-        toast.error("Password is too weak.");
-      } else if (errorCode === 'auth/network-request-failed') {
-        toast.error("Network error. Check your connection.");
       } else {
-        toast.error("Signup failed. Please try again.");
+        toast.error(err.message || "Signup failed. Please try again.");
       }
     } finally {
       setLoading(false);

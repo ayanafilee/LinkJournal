@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Star, Loader2, Trash2, AlertTriangle } from 'lucide-react';
-import { useToggleImportantMutation, useDeleteJournalMutation } from '@/store/api/apiSlice';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Star, Loader2, Trash2, AlertTriangle, ExternalLink } from "lucide-react";
+import { useToggleImportantMutation, useDeleteJournalMutation } from "@/store/api/apiSlice";
+import toast from "react-hot-toast";
 
 type JournalCardProps = {
-  id: string; 
+  id: string;
   name: string;
   description: string;
   isImportant: boolean;
+  link?: string; // Added link prop
 };
 
 export default function JournalCard({
@@ -18,26 +19,36 @@ export default function JournalCard({
   name,
   description,
   isImportant,
+  link,
 }: JournalCardProps) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
-  // Mutations
+
   const [toggleImportant, { isLoading: isToggling }] = useToggleImportantMutation();
   const [deleteJournal, { isLoading: isDeleting }] = useDeleteJournalMutation();
 
+  // Navigates to the internal details page
   const handleTitleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     router.push(`/journal/${id}`);
   };
 
+  // Directly opens the website URL
+  const handleExternalClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (link) {
+      window.open(link, "_blank", "noopener,noreferrer");
+    } else {
+      toast.error("No link available");
+    }
+  };
+
   const handleToggleStar = async (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     try {
       await toggleImportant(id).unwrap();
     } catch (error) {
       toast.error("Failed to update status");
-      console.error("Toggle Important Error:", error);
     }
   };
 
@@ -61,98 +72,97 @@ export default function JournalCard({
           rounded-[60px] 
           shadow-[10px_10px_20px_#bebebe,-10px_-10px_20px_#ffffff]
           transition-all duration-300
+          hover:scale-[1.02]
         "
       >
-        {/* Delete Icon */}
+        {/* NEW: External Link Arrow (Top Right) */}
         <button
-          onClick={(e) => { e.stopPropagation(); setShowDeleteModal(true); }}
-          className="absolute top-8 right-10 text-gray-400 hover:text-red-500 transition-colors"
-          title="Delete Journal"
+          onClick={handleExternalClick}
+          className="absolute top-8 right-10 p-3 bg-white rounded-full shadow-sm text-blue-600 hover:bg-blue-600 hover:text-white transition-all group"
+          title="Visit Website"
         >
-          <Trash2 size={24} />
+          <ExternalLink size={20} className="group-active:scale-90" />
         </button>
 
         {/* Clickable Title */}
-        <h3 
+        <h3
           onClick={handleTitleClick}
           className="
-            text-3xl font-medium mb-6 text-center 
-            text-blue-600 hover:text-blue-800 
-            cursor-pointer hover:underline underline-offset-4
-            transition-colors duration-200
+            text-3xl font-bold mb-6 text-center 
+            text-gray-900 hover:text-blue-600 
+            cursor-pointer transition-colors duration-200
+            px-6
           "
         >
           {name}
         </h3>
 
         {/* Description */}
-        <p className="text-xl text-gray-800 italic font-serif leading-relaxed text-center mb-8 line-clamp-3">
-          {description}
+        <p className="text-lg text-gray-600 italic font-serif leading-relaxed text-center mb-10 line-clamp-3">
+          "{description}"
         </p>
 
-        {/* Footer: Star and Important Label */}
-        <div className="flex items-center justify-between w-full px-4 mt-auto">
-          <span className="text-xl font-bold text-black">Important</span>
-          
-          <button 
-            onClick={handleToggleStar}
-            disabled={isToggling}
-            className="focus:outline-none transition-transform active:scale-90 disabled:opacity-50"
-          >
-            {isToggling ? (
-              <Loader2 size={24} className="animate-spin text-gray-400" />
-            ) : (
-              <Star 
-                size={28} 
-                fill={isImportant ? "#9ca3af" : "none"} 
-                className={isImportant ? "text-gray-400" : "text-gray-300 hover:text-yellow-400"} 
-              />
-            )}
-          </button>
+        {/* Footer: Important Label + Star + Trash */}
+        <div className="flex items-center justify-between w-full px-2 mt-auto">
+          <div className="flex flex-col">
+            <span className="text-xl font-black text-black">Important</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Star Icon */}
+            <button
+              onClick={handleToggleStar}
+              disabled={isToggling}
+              className="focus:outline-none transition-transform active:scale-90 disabled:opacity-50"
+            >
+              {isToggling ? (
+                <Loader2 size={24} className="animate-spin text-gray-400" />
+              ) : (
+                <Star
+                  size={28}
+                  fill={isImportant ? "#EAB308" : "none"}
+                  className={isImportant ? "text-yellow-500" : "text-gray-300 hover:text-yellow-400"}
+                />
+              )}
+            </button>
+
+            {/* Trash Icon (Moved next to Important/Star) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteModal(true);
+              }}
+              className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+              title="Delete"
+            >
+              <Trash2 size={24} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ======================= CUSTOM DELETE MODAL ========================= */}
+      {/* Delete Modal Logic remains the same */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div 
-            className="
-              bg-white rounded-[40px] p-8 max-w-md w-full 
-              shadow-2xl flex flex-col items-center
-              animate-in zoom-in-95 duration-200
-            "
-          >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-[40px] p-8 max-w-md w-full shadow-2xl flex flex-col items-center">
             <div className="bg-red-100 p-4 rounded-full mb-4">
               <AlertTriangle size={32} className="text-red-600" />
             </div>
-            
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Delete Journal?</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Delete this Journal?</h2>
             <p className="text-gray-500 text-center mb-8">
-              This action cannot be undone. You will permanently lose the journal <strong>"{name}"</strong>.
+              This will permanently remove <strong>"{name}"</strong> and all its saved data.
             </p>
-
             <div className="flex gap-4 w-full">
-              {/* Cancel Button */}
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="
-                  flex-1 py-3 px-6 rounded-2xl font-semibold text-gray-700
-                  bg-gray-100 hover:bg-gray-200 transition-colors
-                "
+                className="flex-1 py-3 px-6 rounded-2xl font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
               >
-                Cancel
+                Keep it
               </button>
-
-              {/* Confirm Delete Button */}
               <button
                 onClick={confirmDelete}
                 disabled={isDeleting}
-                className="
-                  flex-1 py-3 px-6 rounded-2xl font-semibold text-white
-                  bg-red-600 hover:bg-red-700 shadow-lg shadow-red-200
-                  transition-all active:scale-95 disabled:opacity-70
-                  flex items-center justify-center gap-2
-                "
+                className="flex-1 py-3 px-6 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-700 transition-all flex items-center justify-center gap-2"
               >
                 {isDeleting ? <Loader2 size={20} className="animate-spin" /> : "Delete"}
               </button>

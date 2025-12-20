@@ -1,4 +1,3 @@
-// app/actions/upload.ts
 'use server';
 
 import { v2 as cloudinary } from 'cloudinary';
@@ -13,16 +12,31 @@ export async function uploadToCloudinary(formData: FormData) {
   const file = formData.get('file') as File;
   if (!file) return null;
 
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      { tags: ['nextjs-upload'] },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result?.secure_url);
-      }
-    ).end(buffer);
-  });
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { 
+          tags: ['nextjs-upload'],
+          resource_type: 'auto', // Important for different formats
+          folder: 'profile_pics'
+        },
+        (error, result) => {
+          if (error) {
+            console.error("Cloudinary Error:", error);
+            reject(error);
+          } else {
+            resolve(result?.secure_url);
+          }
+        }
+      );
+      
+      uploadStream.end(buffer);
+    });
+  } catch (err) {
+    console.error("Upload Action Failed:", err);
+    throw new Error("Failed to process image buffer");
+  }
 }

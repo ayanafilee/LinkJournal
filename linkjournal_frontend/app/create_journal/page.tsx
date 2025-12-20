@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import { useGetTopicsQuery, useCreateJournalMutation } from '@/store/api/apiSlice';
@@ -12,6 +12,7 @@ import { uploadToCloudinary } from '@/app/actions/upload';
 
 export default function AddNewLink() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   
   // Queries & Mutations
   const { data: topics = [] } = useGetTopicsQuery();
@@ -30,6 +31,11 @@ export default function AddNewLink() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Ensure component is mounted to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Filter topics for dropdown search
   const filteredTopics = useMemo(() => {
     return topics.filter(t => 
@@ -46,7 +52,6 @@ export default function AddNewLink() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
     if (!formData.topicId || !formData.name || !formData.url || !formData.photo) {
       toast.error("Please fill in all required fields.");
       return;
@@ -55,12 +60,10 @@ export default function AddNewLink() {
     try {
       setIsUploading(true);
       
-      // 1. Upload Image to Cloudinary
       const uploadData = new FormData();
       uploadData.append('file', formData.photo);
       const cloudinaryUrl = (await uploadToCloudinary(uploadData)) as string;
       
-      // 2. Create Journal entry
       await createJournal({
         topic_id: formData.topicId,   
         name: formData.name,          
@@ -69,20 +72,14 @@ export default function AddNewLink() {
         screenshot: cloudinaryUrl,    
       }).unwrap();
 
-      // 3. Success Feedback
-      toast.success("Journal created successfully!", {
-        duration: 3000,
-        position: 'top-right',
-      });
+      toast.success("Journal created successfully!");
       
-      // 4. Reset form
       setFormData({ topicId: '', name: '', url: '', description: '', photo: null });
       setSearchTerm('');
 
-      // 5. Navigate after 3 seconds
       setTimeout(() => {
         router.push('/journals');
-      }, 3000);
+      }, 2000);
 
     } catch (error) {
       console.error('Submission failed:', error);
@@ -94,9 +91,11 @@ export default function AddNewLink() {
 
   const isPending = isUploading || isCreating;
 
+  // Render nothing or a skeleton until mounted to ensure hydration matches
+  if (!mounted) return null;
+
   return (
     <main className="min-h-screen bg-[#F8F9FA] py-12 px-4">
-      {/* Toast Container */}
       <Toaster position="top-right" reverseOrder={false} />
 
       <div className="max-w-4xl mx-auto">
@@ -104,7 +103,7 @@ export default function AddNewLink() {
           onSubmit={handleSubmit}
           className="bg-white border border-[#E9ECEF] rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 md:p-12 space-y-12"
         >
-          {/* --- TOPIC SELECTION --- */}
+          {/* TOPIC SELECTION */}
           <section className="space-y-5">
             <div>
               <h2 className="text-2xl font-bold text-[#212529] tracking-tight">Select topic</h2>
@@ -148,7 +147,7 @@ export default function AddNewLink() {
             </div>
           </section>
 
-          {/* --- NAME SECTION --- */}
+          {/* NAME SECTION */}
           <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-10">
             <label className="text-xl font-bold text-[#212529] md:w-64">Link name</label>
             <div className="flex-1">
@@ -168,7 +167,7 @@ export default function AddNewLink() {
             </div>
           </div>
 
-          {/* --- URL SECTION --- */}
+          {/* URL SECTION */}
           <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-10">
             <div className="flex items-center gap-2 md:w-64">
                <label className="text-xl font-bold text-[#212529]">URL</label>
@@ -183,7 +182,7 @@ export default function AddNewLink() {
             />
           </div>
 
-          {/* --- DESCRIPTION SECTION --- */}
+          {/* DESCRIPTION SECTION */}
           <div className="space-y-4">
             <label className="text-xl font-bold text-[#212529]">Description</label>
             <div className="border border-[#DEE2E6] rounded-2xl overflow-hidden focus-within:ring-4 focus-within:ring-blue-50 focus-within:border-blue-400 transition-all">
@@ -210,7 +209,7 @@ export default function AddNewLink() {
             </div>
           </div>
 
-          {/* --- UPLOAD SECTION --- */}
+          {/* UPLOAD SECTION */}
           <div className="space-y-4">
             <div>
               <h3 className="text-xl font-bold text-[#212529]">Cover photo</h3>
@@ -235,7 +234,7 @@ export default function AddNewLink() {
             </label>
           </div>
 
-          {/* --- ACTION BUTTON --- */}
+          {/* ACTION BUTTON */}
           <div className="flex justify-end pt-4">
             <button
               type="submit"

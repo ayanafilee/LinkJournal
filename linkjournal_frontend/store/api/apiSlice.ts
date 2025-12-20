@@ -3,7 +3,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store'; 
 import {
-    Topic, LinkJournal, CreateTopicRequest, CreateJournalRequest, UpdateJournalRequest, ObjectId,
+    Topic, LinkJournal,User, CreateTopicRequest, CreateJournalRequest, UpdateJournalRequest, ObjectId,
 } from '@/types/index';
 
 const FIREBASE_TOKEN_KEY = 'firebaseIdToken'; 
@@ -15,7 +15,7 @@ const getAuthToken = async (): Promise<string | undefined> => {
 };
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://linkjournal-3.onrender.com',
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || '',
     prepareHeaders: async (headers) => {
         const token = await getAuthToken();
         if (token) {
@@ -29,9 +29,16 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithErrorHandling = async (args: any, api: any, extraOptions: any) => {
     try {
         const result = await baseQuery(args, api, extraOptions);
+        
         if (result.error) {
-            console.error('❌ API Error:', result.error);
+            // Check if the error is NOT a 404 before logging as an error
+            if (result.error.status === 404) {
+                console.warn(`ℹ️ Resource not found (404): ${typeof args === 'string' ? args : args.url}`);
+            } else {
+                console.error('❌ API Error:', result.error);
+            }
         }
+        
         return result;
     } catch (error) {
         return { error: { status: 'FETCH_ERROR', error: String(error) } };
@@ -41,7 +48,7 @@ const baseQueryWithErrorHandling = async (args: any, api: any, extraOptions: any
 export const apiSlice = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithErrorHandling,
-    tagTypes: ['Topic', 'Journal'],
+    tagTypes: ['Topic', 'Journal','User'],
     endpoints: (builder) => ({
 
         // ================== TOPIC ENDPOINTS ==================
@@ -181,6 +188,29 @@ export const apiSlice = createApi({
                 dispatch(apiSlice.util.invalidateTags([{ type: 'Journal', id }]));
             },
         }),
+    // ================== USER ENDPOINTS ==================
+        signupUser: builder.mutation<any, any>({
+            query: (userData) => ({
+                url: 'api/users/signup',
+                method: 'POST',
+                body: userData,
+            }),
+            invalidatesTags: ['User'],
+        }),
+
+        getUserProfile: builder.query<any, void>({
+            query: () => 'api/users/me',
+            providesTags: ['User'],
+        }),
+        // 🔥 NEW: Update Profile Picture
+        updateProfilePicture: builder.mutation<{ message: string; profile_picture: string }, { profile_picture: string }>({
+            query: (body) => ({
+                url: 'api/users/profile-picture',
+                method: 'PUT',
+                body,
+            }),
+            invalidatesTags: ['User'], // This refreshes getUserProfile automatically
+        }),
     }),
 });
 
@@ -198,4 +228,7 @@ export const {
     useUpdateJournalMutation,
     useDeleteJournalMutation,
     useToggleImportantMutation,
+    useSignupUserMutation,
+    useGetUserProfileQuery,
+    useUpdateProfilePictureMutation,
 } = apiSlice;

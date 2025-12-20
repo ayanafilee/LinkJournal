@@ -28,6 +28,15 @@ export interface LinkJournal {
   created_at: string;
 }
 
+
+export interface User {
+    id?: string;
+    firebase_uid: string;
+    email: string;
+    display_name: string;
+    profile_picture: string;
+    created_at?: string;
+}
 /**
  * Request Body Types
  */

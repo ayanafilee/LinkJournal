@@ -1,11 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import TopicCard from "./TopicCard";
 
 interface Topic {
-  // Use string because MongoDB/ObjectIds are strings 
-  // and match this with your TopicCard id: string prop
   id: string; 
   name: string;
 }
@@ -23,6 +21,15 @@ const TopicGrid: React.FC<TopicGridProps> = ({
   setTopicName,
   handleCreateTopic,
 }) => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Fixes hydration mismatch and ensures focus is handled correctly by the browser
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
+
   return (
     <div className="container mx-auto p-4 sm:p-8 bg-gray-50 min-h-screen">
       {/* Header + Form */}
@@ -37,11 +44,13 @@ const TopicGrid: React.FC<TopicGridProps> = ({
             value={topicName}
             onChange={(e) => setTopicName(e.target.value)}
             placeholder="New Topic Name"
+            autoComplete="off"
             className="
               border border-gray-300
               p-2 flex-grow sm:flex-none sm:w-64
               rounded-lg shadow-sm
-              focus:ring-blue-500 focus:border-blue-500
+              focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+              outline-none
               bg-white text-gray-900
             "
           />
@@ -69,7 +78,7 @@ const TopicGrid: React.FC<TopicGridProps> = ({
         {topics.map((topic) => (
           <TopicCard 
             key={topic.id} 
-            id={topic.id} // <--- THIS WAS MISSING
+            id={topic.id} 
             topicName={topic.name} 
           />
         ))}

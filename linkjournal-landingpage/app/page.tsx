@@ -19,9 +19,11 @@ export default function LandingPage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-4">
-                        <button className="bg-[#2B61E3] hover:bg-blue-700 text-white font-bold text-lg py-3 px-8 rounded-full shadow-lg transition-transform hover:scale-105">
+                    <Link href="https://link-journal-qbth.vercel.app/auth/signup" rel="noopener noreferrer">
+                        <button className="bg-[#2B61E3] hover:bg-blue-700 text-white font-semibold py-2 px-4 text-sm md:text-base md:px-6 rounded-full transition-colors">
                             Join Now
                         </button>
+                    </Link>
                         <span className="text-gray-600 text-sm mt-2 sm:mt-0">
                             154 people started using it.
                         </span>

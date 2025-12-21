@@ -156,9 +156,11 @@ export default function Layout({ children }: LayoutProps) {
                         </nav>
 
                         {/* Join Button - Visible on Mobile and Desktop */}
-                        <button className="bg-[#2B61E3] hover:bg-blue-700 text-white font-semibold py-2 px-4 text-sm md:text-base md:px-6 rounded-full transition-colors">
-                            Join Now
-                        </button>
+                        <Link href="https://link-journal-qbth.vercel.app/auth/signup" rel="noopener noreferrer">
+                            <button className="bg-[#2B61E3] hover:bg-blue-700 text-white font-semibold py-2 px-4 text-sm md:text-base md:px-6 rounded-full transition-colors">
+                                Join Now
+                            </button>
+                        </Link>
                     </div>
                 </div>
 

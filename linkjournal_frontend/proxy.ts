@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-// This middleware is currently a placeholder as the app uses Firebase Client-side Auth
-export function middleware(request: NextRequest) {
+// This proxy is currently a placeholder as the app uses Firebase Client-side Auth
+export function proxy(request: NextRequest) {
   return NextResponse.next()
 }
 

@@ -7,7 +7,7 @@ import { useDeleteTopicMutation, useUpdateTopicMutation } from "@/store/api/apiS
 import toast from "react-hot-toast";
 
 interface TopicCardProps {
-  id: string; 
+  id: string;
   topicName: string;
 }
 
@@ -71,24 +71,24 @@ const TopicCard: React.FC<TopicCardProps> = ({ id, topicName }) => {
         "
       >
         <span className="text-center group-hover:text-blue-600 transition-colors">
-            {topicName}
+          {topicName}
         </span>
 
         {/* Action Buttons (Visible on Hover) */}
         <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={(e) => { 
-                e.stopPropagation(); // Prevents navigating to the topic page
-                setShowEditModal(true); 
+            onClick={(e) => {
+              e.stopPropagation(); // Prevents navigating to the topic page
+              setShowEditModal(true);
             }}
             className="p-1.5 bg-white/80 backdrop-blur-sm rounded-lg hover:text-blue-600 transition-colors shadow-sm"
           >
             <Edit3 size={18} />
           </button>
           <button
-            onClick={(e) => { 
-                e.stopPropagation(); // Prevents navigating to the topic page
-                setShowDeleteModal(true); 
+            onClick={(e) => {
+              e.stopPropagation(); // Prevents navigating to the topic page
+              setShowDeleteModal(true);
             }}
             className="p-1.5 bg-white/80 backdrop-blur-sm rounded-lg hover:text-red-600 transition-colors shadow-sm"
           >

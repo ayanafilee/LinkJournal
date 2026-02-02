@@ -80,11 +80,12 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {data.map((journal: LinkJournal) => (
             <JournalCard
-              key={journal.id}
-              id={journal.id}
+              key={journal.id || (journal as any)._id}
+              id={journal.id || (journal as any)._id}
               name={journal.name}
               description={journal.description ?? ""}
               isImportant={journal.is_important}
+              link={journal.link}
             />
           ))}
         </div>

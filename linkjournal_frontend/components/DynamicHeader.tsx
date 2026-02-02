@@ -54,13 +54,13 @@ const DynamicHeader: React.FC = () => {
         <span className="mr-4 text-gray-700 text-lg font-medium hidden sm:block">
           {user?.display_name || "User"}
         </span>
-        
+
         {/* Link to base page as requested */}
         <Link href="/profile">
           <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-300 hover:border-blue-400 transition-colors cursor-pointer">
             <img
               // Use profile_picture from DB, fallback to placeholder if empty
-              src={user?.profile_picture || "/profile-placeholder.png"} 
+              src={user?.profile_picture || "/profile-placeholder.png"}
               alt={user?.display_name || "Profile"}
               className="h-full w-full object-cover"
             />
@@ -85,8 +85,8 @@ const DynamicHeader: React.FC = () => {
       <div className="flex justify-center mt-6 px-6">
         <SearchInput
           searchFor={currentSearchFor}
-          onChange={() => {}}
-          onSearch={() => {}}
+          onChange={() => { }}
+          onSearch={() => { }}
         />
       </div>
 

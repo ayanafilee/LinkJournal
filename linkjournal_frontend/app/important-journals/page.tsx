@@ -97,6 +97,7 @@ export default function ImportantJournalsPage() {
               name={journal.name}
               description={journal.description ?? ""}
               isImportant={journal.is_important}
+              link={journal.link}
             />
           ))}
         </div>

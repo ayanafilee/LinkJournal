@@ -77,9 +77,10 @@ func CORSMiddleware() gin.HandlerFunc {
 // ======================= USER PROFILE CONTROLLER =========================
 func CreateUser(c *gin.Context, col *mongo.Collection) {
 	var body struct {
-		FirebaseUID string `json:"firebase_uid"`
-		Email       string `json:"email"`
-		DisplayName string `json:"display_name"`
+		FirebaseUID    string `json:"firebase_uid"`
+		Email          string `json:"email"`
+		DisplayName    string `json:"display_name"`
+		ProfilePicture string `json:"profile_picture"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -99,7 +100,7 @@ func CreateUser(c *gin.Context, col *mongo.Collection) {
 		FirebaseUID:    body.FirebaseUID,
 		Email:          body.Email,
 		DisplayName:    body.DisplayName,
-		ProfilePicture: "", // Placeholder for later
+		ProfilePicture: body.ProfilePicture,
 		CreatedAt:      time.Now(),
 	}
 

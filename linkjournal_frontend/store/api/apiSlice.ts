@@ -1,12 +1,12 @@
 // store/api/apiSlice.ts (UPDATED)
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { RootState } from '../store'; 
+import { RootState } from '../store';
 import {
-    Topic, LinkJournal,User, CreateTopicRequest, CreateJournalRequest, UpdateJournalRequest, ObjectId,
+    Topic, LinkJournal, User, CreateTopicRequest, CreateJournalRequest, UpdateJournalRequest, ObjectId,
 } from '@/types/index';
 
-const FIREBASE_TOKEN_KEY = 'firebaseIdToken'; 
+const FIREBASE_TOKEN_KEY = 'firebaseIdToken';
 
 const getAuthToken = async (): Promise<string | undefined> => {
     if (typeof window === 'undefined') return undefined;
@@ -29,16 +29,25 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithErrorHandling = async (args: any, api: any, extraOptions: any) => {
     try {
         const result = await baseQuery(args, api, extraOptions);
-        
+
         if (result.error) {
-            // Check if the error is NOT a 404 before logging as an error
-            if (result.error.status === 404) {
-                console.warn(`ℹ️ Resource not found (404): ${typeof args === 'string' ? args : args.url}`);
+            const status = result.error.status;
+            const method = typeof args === 'string' ? 'GET' : args.method || 'GET';
+            const url = typeof args === 'string' ? args : args.url;
+
+            // Handle specific status codes to reduce console noise
+            if (status === 404) {
+                console.warn(`ℹ️ 404 Not Found: [${method}] ${url}`);
+            } else if (status === 409) {
+                // 409 Conflict is normal during signup-as-login flows
+                console.info(`ℹ️ 409 Conflict (User/Resource already exists): [${method}] ${url}`);
+            } else if (status === 401) {
+                console.warn(`🔒 401 Unauthorized: [${method}] ${url}. Check if token is valid.`);
             } else {
-                console.error('❌ API Error:', result.error);
+                console.error(`❌ API Error (${status}): [${method}] ${url}`, result.error);
             }
         }
-        
+
         return result;
     } catch (error) {
         return { error: { status: 'FETCH_ERROR', error: String(error) } };
@@ -48,7 +57,7 @@ const baseQueryWithErrorHandling = async (args: any, api: any, extraOptions: any
 export const apiSlice = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithErrorHandling,
-    tagTypes: ['Topic', 'Journal','User'],
+    tagTypes: ['Topic', 'Journal', 'User'],
     endpoints: (builder) => ({
 
         // ================== TOPIC ENDPOINTS ==================
@@ -188,7 +197,7 @@ export const apiSlice = createApi({
                 dispatch(apiSlice.util.invalidateTags([{ type: 'Journal', id }]));
             },
         }),
-    // ================== USER ENDPOINTS ==================
+        // ================== USER ENDPOINTS ==================
         signupUser: builder.mutation<any, any>({
             query: (userData) => ({
                 url: 'api/users/signup',

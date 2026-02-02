@@ -35,9 +35,16 @@ export default function JournalCard({
 
   // Directly opens the website URL
   const handleExternalClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
+
     if (link) {
-      window.open(link, "_blank", "noopener,noreferrer");
+      // Ensure the link has a protocol
+      let url = link;
+      if (!/^https?:\/\//i.test(link)) {
+        url = 'https://' + link;
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
     } else {
       toast.error("No link available");
     }
@@ -78,7 +85,7 @@ export default function JournalCard({
         {/* NEW: External Link Arrow (Top Right) */}
         <button
           onClick={handleExternalClick}
-          className="absolute top-8 right-10 p-3 bg-white rounded-full shadow-sm text-blue-600 hover:bg-blue-600 hover:text-white transition-all group"
+          className="absolute top-8 right-10 p-3 bg-white rounded-full shadow-sm text-blue-600 hover:bg-blue-600 hover:text-white transition-all group z-20"
           title="Visit Website"
         >
           <ExternalLink size={20} className="group-active:scale-90" />

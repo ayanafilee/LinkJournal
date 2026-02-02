@@ -14,7 +14,7 @@ export default function TopicJournalsPage() {
 
   // Fetch Topic Name
   const { data: topicData, isLoading: isTopicLoading } = useGetTopicByIdQuery(topicId);
-  
+
   // Fetch Journals for this topic
   const { data: journals, isLoading: isJournalsLoading, error } = useGetJournalsByTopicQuery(topicId);
 
@@ -47,14 +47,14 @@ export default function TopicJournalsPage() {
     <PageWrapper>
       {/* Header with Navigation */}
       <div className="mb-10">
-        <Link 
-          href="/topics" 
+        <Link
+          href="/topics"
           className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors mb-4 group"
         >
           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
           <span>Back to Dashboard</span>
         </Link>
-        
+
         <div className="flex justify-between items-end">
           <div>
             <h1 className="text-4xl font-extrabold text-gray-900 capitalize">
@@ -84,6 +84,7 @@ export default function TopicJournalsPage() {
               name={journal.name}
               description={journal.description ?? ""}
               isImportant={journal.is_important}
+              link={journal.link}
             />
           ))}
         </div>

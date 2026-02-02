@@ -1,8 +1,8 @@
-import { updateSession } from '@/lib/supabase/proxy'
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+// This middleware is currently a placeholder as the app uses Firebase Client-side Auth
+export function middleware(request: NextRequest) {
+  return NextResponse.next()
 }
 
 export const config = {

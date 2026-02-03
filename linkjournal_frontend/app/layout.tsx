@@ -1,7 +1,13 @@
 import React from 'react';
-import { ReduxProvider } from './Provider'; 
+import type { Metadata } from 'next';
+import { ReduxProvider } from './Provider';
 import './globals.css';
 import ConditionalLayout from '@/components/ConditionalLayout';
+
+export const metadata: Metadata = {
+  title: 'LinkJournal',
+  description: 'Your personal digital journal for links and insights.',
+};
 
 export default function RootLayout({
   children,
@@ -10,9 +16,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head />
-      <body 
-        className="min-h-screen flex flex-col w-full" 
+      <body
+        className="min-h-screen flex flex-col w-full"
         suppressHydrationWarning={true}
       >
         <ReduxProvider>

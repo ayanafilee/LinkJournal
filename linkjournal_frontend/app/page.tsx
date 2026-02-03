@@ -5,6 +5,7 @@ import { useGetJournalsQuery } from "@/store/api/apiSlice";
 import JournalCard from "@/components/JournalCard";
 import type { LinkJournal } from "@/types/index";
 import Link from "next/link";
+import { ErrorDisplay } from "@/components/ErrorDisplay";
 
 // 1. Move PageWrapper outside to keep component references stable
 const PageWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -40,9 +41,12 @@ export default function HomePage() {
   if (error)
     return (
       <PageWrapper>
-        <div className="text-center text-xl font-semibold text-red-500 py-20 bg-red-50 rounded-2xl border border-red-100">
-          Failed to load journals. Please try again later.
-        </div>
+        <ErrorDisplay
+          variant="error"
+          title="Failed to Load Journals"
+          message="We couldn't load your journals. Please try again."
+          onRetry={() => window.location.reload()}
+        />
       </PageWrapper>
     );
 

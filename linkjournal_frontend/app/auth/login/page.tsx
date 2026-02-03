@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import { useSignupUserMutation } from "@/store/api/apiSlice";
+import { handleError, handleSuccess } from "@/lib/errorHandler";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -82,18 +83,7 @@ export default function LoginPage() {
       }, 1500);
 
     } catch (err: any) {
-      // 4. Handle Errors purely with UI (No console logs)
-      const errorCode = err.code;
-
-      if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password') {
-        toast.error("Invalid email or password.");
-      } else if (errorCode === 'auth/too-many-requests') {
-        toast.error("Too many failed attempts. Please try again later.");
-      } else if (errorCode === 'auth/network-request-failed') {
-        toast.error("Network error. Check your connection.");
-      } else {
-        toast.error("Login failed. Please try again.");
-      }
+      handleError(err);
     } finally {
       setLoading(false);
     }
@@ -120,7 +110,6 @@ export default function LoginPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log(`${providerName} user:`, user);
 
       // Sync with MongoDB (in case they haven't signed up yet)
       try {
@@ -130,14 +119,12 @@ export default function LoginPage() {
           display_name: user.displayName || "User",
           profile_picture: user.photoURL || "",
         }).unwrap();
-        toast.success(`Logged in with ${providerName === 'google' ? 'Google' : 'Facebook'}!`);
+        handleSuccess(`Logged in with ${providerName === 'google' ? 'Google' : 'Facebook'}!`);
       } catch (dbError: any) {
-        // 409 Conflict means they already exist, which is expected for a login
         if (dbError.status === 409) {
-          toast.success(`Logged in with ${providerName === 'google' ? 'Google' : 'Facebook'}!`);
+          handleSuccess(`Logged in with ${providerName === 'google' ? 'Google' : 'Facebook'}!`);
         } else {
-          console.error("Database sync failed:", dbError);
-          toast.error("Authenticated with Firebase, but failed to sync our database.");
+          handleError(dbError, "Authenticated with Firebase, but failed to sync our database.");
         }
       }
 
@@ -146,14 +133,7 @@ export default function LoginPage() {
       }, 1500);
 
     } catch (err: any) {
-      console.error(`${providerName} login error:`, err);
-      if (err.code === 'auth/popup-blocked') {
-        toast.error("Popup blocked! Please allow popups for this site in your browser settings.");
-      } else if (err.code === 'auth/popup-closed-by-user') {
-        toast.error("Login cancelled (popup closed).");
-      } else {
-        toast.error(err.message || `Failed to sign in with ${providerName === 'google' ? 'Google' : 'Facebook'}`);
-      }
+      handleError(err);
     } finally {
       setLoading(false);
     }

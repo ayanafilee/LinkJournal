@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGetTopicsQuery, useCreateTopicMutation } from '@/store/api/apiSlice';
 import TopicGrid from '@/components/TopicGrid';
+import { ErrorDisplay } from '@/components/ErrorDisplay';
+import { handleError } from '@/lib/errorHandler';
 
 // Define PageWrapper outside to prevent focus loss issues
 const PageWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -13,12 +15,12 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => (
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
-  
-  const { 
-    data: topics = [], 
-    isLoading, 
-    isError, 
-    error 
+
+  const {
+    data: topics = [],
+    isLoading,
+    isError,
+    error
   } = useGetTopicsQuery();
 
   const [createTopic] = useCreateTopicMutation();
@@ -33,10 +35,10 @@ export default function HomePage() {
     if (!topicName.trim()) return;
 
     try {
-      await createTopic({ name: topicName }).unwrap(); 
+      await createTopic({ name: topicName }).unwrap();
       setTopicName('');
     } catch (err) {
-      console.error('Failed to create topic:', err);
+      handleError(err, 'Failed to create topic');
     }
   };
 
@@ -58,12 +60,12 @@ export default function HomePage() {
   if (isError)
     return (
       <PageWrapper>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center p-8 bg-red-50 rounded-2xl border border-red-100">
-            <h2 className="text-xl font-bold text-red-600 mb-2">Oops! Something went wrong</h2>
-            <p className="text-red-500">{(error as any)?.data?.error || 'Failed to fetch topics'}</p>
-          </div>
-        </div>
+        <ErrorDisplay
+          variant="error"
+          title="Failed to Load Topics"
+          message="We couldn't load your topics. Please try again."
+          onRetry={() => window.location.reload()}
+        />
       </PageWrapper>
     );
 

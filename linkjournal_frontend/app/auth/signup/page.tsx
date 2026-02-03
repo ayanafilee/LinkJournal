@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import { useSignupUserMutation } from "@/store/api/apiSlice";
+import { handleError, handleSuccess } from "@/lib/errorHandler";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -115,7 +116,6 @@ export default function SignupPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log(`${providerName} user:`, user);
 
       // Sync with MongoDB
       try {
@@ -125,13 +125,12 @@ export default function SignupPage() {
           display_name: user.displayName || "User",
           profile_picture: user.photoURL || "",
         }).unwrap();
-        toast.success(`Signed up with ${providerName === 'google' ? 'Google' : 'Facebook'}!`);
+        handleSuccess(`Signed up with ${providerName === 'google' ? 'Google' : 'Facebook'}!`);
       } catch (dbError: any) {
         if (dbError.status === 409) {
-          toast.success(`Logged in with ${providerName === 'google' ? 'Google' : 'Facebook'}!`);
+          handleSuccess(`Logged in with ${providerName === 'google' ? 'Google' : 'Facebook'}!`);
         } else {
-          console.error("Database sync failed:", dbError);
-          toast.error("Account created in Firebase, but failed to sync with our database.");
+          handleError(dbError, "Account created in Firebase, but failed to sync with our database.");
         }
       }
 
@@ -140,14 +139,7 @@ export default function SignupPage() {
       }, 1500);
 
     } catch (err: any) {
-      console.error(`${providerName} auth error:`, err);
-      if (err.code === 'auth/popup-blocked') {
-        toast.error("Popup blocked! Please allow popups for this site in your browser settings.");
-      } else if (err.code === 'auth/popup-closed-by-user') {
-        toast.error("Sign up cancelled (popup closed).");
-      } else {
-        toast.error(err.message || `Failed to sign up with ${providerName === 'google' ? 'Google' : 'Facebook'}`);
-      }
+      handleError(err);
     } finally {
       setLoading(false);
     }
@@ -180,25 +172,21 @@ export default function SignupPage() {
         throw new Error("Database sync failed. Please try again.");
       }
 
-      // 3. Send Verification Email
       await sendEmailVerification(userCredential.user);
 
-      toast.success("Account created! Redirecting...", { duration: 2000 });
+      handleSuccess("Account created! Redirecting...");
 
       setTimeout(() => {
         router.push("/");
       }, 1500);
 
     } catch (err: any) {
-      // Handles both Firebase errors and our custom Database error
       const errorCode = err.code;
 
       if (errorCode === 'auth/email-already-in-use') {
         setEmailError("This email is already in use.");
-        toast.error("Email already registered.");
-      } else {
-        toast.error(err.message || "Signup failed. Please try again.");
       }
+      handleError(err);
     } finally {
       setLoading(false);
     }

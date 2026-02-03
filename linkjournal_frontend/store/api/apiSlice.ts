@@ -35,21 +35,43 @@ const baseQueryWithErrorHandling = async (args: any, api: any, extraOptions: any
             const method = typeof args === 'string' ? 'GET' : args.method || 'GET';
             const url = typeof args === 'string' ? args : args.url;
 
-            // Handle specific status codes to reduce console noise
-            if (status === 404) {
-                console.warn(`ℹ️ 404 Not Found: [${method}] ${url}`);
-            } else if (status === 409) {
-                // 409 Conflict is normal during signup-as-login flows
-                console.info(`ℹ️ 409 Conflict (User/Resource already exists): [${method}] ${url}`);
-            } else if (status === 401) {
-                console.warn(`🔒 401 Unauthorized: [${method}] ${url}. Check if token is valid.`);
-            } else {
-                console.error(`❌ API Error (${status}): [${method}] ${url}`, result.error);
+            // Silent error logging - only store in development for debugging
+            if (process.env.NODE_ENV === 'development') {
+                try {
+                    const errorLog = {
+                        status,
+                        method,
+                        url,
+                        error: result.error,
+                        timestamp: new Date().toISOString(),
+                    };
+                    const existingLogs = sessionStorage.getItem('api_error_logs');
+                    const logs = existingLogs ? JSON.parse(existingLogs) : [];
+                    logs.push(errorLog);
+                    // Keep only last 50 errors
+                    if (logs.length > 50) logs.shift();
+                    sessionStorage.setItem('api_error_logs', JSON.stringify(logs));
+                } catch {
+                    // Silently fail if sessionStorage is not available
+                }
             }
         }
 
         return result;
     } catch (error) {
+        // Silent error handling
+        if (process.env.NODE_ENV === 'development') {
+            try {
+                const errorLog = {
+                    type: 'FETCH_ERROR',
+                    error: String(error),
+                    timestamp: new Date().toISOString(),
+                };
+                sessionStorage.setItem('last_fetch_error', JSON.stringify(errorLog));
+            } catch {
+                // Silently fail
+            }
+        }
         return { error: { status: 'FETCH_ERROR', error: String(error) } };
     }
 };

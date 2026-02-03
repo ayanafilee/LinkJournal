@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Star, Loader2, Trash2, AlertTriangle, ExternalLink } from "lucide-react";
 import { useToggleImportantMutation, useDeleteJournalMutation } from "@/store/api/apiSlice";
-import toast from "react-hot-toast";
+import { handleError, handleSuccess, handleWarning } from "@/lib/errorHandler";
 
 type JournalCardProps = {
   id: string;
@@ -46,7 +46,7 @@ export default function JournalCard({
       }
       window.open(url, "_blank", "noopener,noreferrer");
     } else {
-      toast.error("No link available");
+      handleWarning("No link available");
     }
   };
 
@@ -55,17 +55,17 @@ export default function JournalCard({
     try {
       await toggleImportant(id).unwrap();
     } catch (error) {
-      toast.error("Failed to update status");
+      handleError(error, "Failed to update status");
     }
   };
 
   const confirmDelete = async () => {
     try {
       await deleteJournal(id).unwrap();
-      toast.success("Journal deleted successfully");
+      handleSuccess("Journal deleted successfully");
       setShowDeleteModal(false);
     } catch (error) {
-      toast.error("Failed to delete journal");
+      handleError(error, "Failed to delete journal");
     }
   };
 

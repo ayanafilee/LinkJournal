@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/firebase/clientApp';
 import { useRouter } from 'next/navigation';
+import { handleError, handleSuccess } from '@/lib/errorHandler';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -46,11 +47,11 @@ export default function ProfilePage() {
 
       await updateProfilePic({ profile_picture: cloudinaryUrl }).unwrap();
 
-      toast.success("Profile picture updated!");
+      handleSuccess("Profile picture updated!");
       setSelectedFile(null);
       setPreviewUrl(null);
     } catch (error: any) {
-      toast.error('Failed to update profile.');
+      handleError(error, 'Failed to update profile.');
     } finally {
       setIsUploading(false);
     }
@@ -59,10 +60,10 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast.success("Logged out successfully");
+      handleSuccess("Logged out successfully");
       router.push("/auth/login");
     } catch (error) {
-      toast.error("Failed to log out");
+      handleError(error, "Failed to log out");
     }
   };
 

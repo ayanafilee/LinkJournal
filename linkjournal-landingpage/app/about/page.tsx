@@ -8,11 +8,11 @@ import PersonaCard from '@/components/PersonaCard';
 export default function AboutPage() {
     // Reusable SVG icons for email and LinkedIn (can be replaced by Lucide components if preferred)
     const MailIcon = (props: React.SVGProps<SVGSVGElement>) => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
     );
 
     const LinkedinIcon = (props: React.SVGProps<SVGSVGElement>) => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect width="4" height="12" x="2" y="9" /><circle cx="4" cy="4" r="2" /></svg>
     );
 
     return (
@@ -32,7 +32,7 @@ export default function AboutPage() {
             {/* ================= SECTION 1: OUR CORE MISSION ================= */}
             <section className="bg-white px-4 md:px-8 py-16 md:py-24 shadow-inner">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                    
+
                     {/* Text Side */}
                     <div className="space-y-6">
                         <span className="text-xl font-extrabold text-[#C5A365] flex items-center gap-3">
@@ -43,11 +43,11 @@ export default function AboutPage() {
                         </h2>
                         <div className="space-y-4 text-gray-700 text-base leading-relaxed">
                             <p>
-                                We go beyond simple link storage. Our platform is designed as a <span className="font-semibold">digital memory companion</span>. Every feature—from the detailed description box to the topic organization—is built to address your core goals:
+                                We go beyond simple link storage. Our platform is designed as a <span className="font-semibold">digital memory companion</span>. Every feature - from the detailed description box to the topic organization - is built to address your core goals:
                             </p>
                             <ul className="list-disc list-inside space-y-2 pl-4">
                                 <li>
-                                    <span className="font-semibold">Contextual Capture:</span> We capture not just the URL, but the <span className="font-semibold"></span> behind the save—the personal insight, the lesson learned, or the future application.
+                                    <span className="font-semibold">Contextual Capture:</span> We capture not just the URL, but the <span className="font-semibold"></span> behind the save - the personal insight, the lesson learned, or the future application.
                                 </li>
                                 <li>
                                     <span className="font-semibold">Meaningful Archiving:</span> We ensure resources are structured using flexible topics, guaranteeing you can find them years from now.
@@ -65,7 +65,7 @@ export default function AboutPage() {
                             "The internet is an ocean of information. LinkJournal is your personalized net, helping you keep the most valuable catches and catalogue them for future use."
                         </p>
                         <p className="mt-4 text-sm font-medium text-[#C5A365]">
-                            — LinkJournal Founding Philosophy
+                            - LinkJournal Founding Philosophy
                         </p>
                     </div>
                 </div>
@@ -85,10 +85,10 @@ export default function AboutPage() {
 
                 <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     {/* Persona Cards remain here */}
-                    <PersonaCard title="Lifelong Learners" description="Individuals focused on continuous self-improvement who need to save, reflect on, and organize insights from their diverse online learning journey." icon="📘"/>
-                    <PersonaCard title="Developers & Researchers" description="Professionals who frequently find critical documentation, tools, and technical articles that must be preserved in a structured, searchable knowledge base." icon="🔬"/>
-                    <PersonaCard title="Students" description="Learners gathering study materials, summarizing complex lessons, and needing a highly organized way to revisit core academic resources during exams and beyond." icon="🎓"/>
-                    <PersonaCard title="Knowledge Curators" description="Content creators, educators, or bloggers who maintain a personal, meaningful library of resources for content inspiration and reliable reference." icon="💡"/>
+                    <PersonaCard title="Lifelong Learners" description="Individuals focused on continuous self-improvement who need to save, reflect on, and organize insights from their diverse online learning journey." icon="📘" />
+                    <PersonaCard title="Developers & Researchers" description="Professionals who frequently find critical documentation, tools, and technical articles that must be preserved in a structured, searchable knowledge base." icon="🔬" />
+                    <PersonaCard title="Students" description="Learners gathering study materials, summarizing complex lessons, and needing a highly organized way to revisit core academic resources during exams and beyond." icon="🎓" />
+                    <PersonaCard title="Knowledge Curators" description="Content creators, educators, or bloggers who maintain a personal, meaningful library of resources for content inspiration and reliable reference." icon="💡" />
                 </div>
             </section>
 
@@ -103,9 +103,9 @@ export default function AboutPage() {
                         LinkJournal is a passion project built on a personal need, ensuring every detail is tuned for the end-user experience.
                     </p>
                 </div>
-                
+
                 <div className="max-w-5xl mx-auto p-8 bg-white rounded-xl shadow-2xl border-t-4 border-[#2B61E3] flex flex-col md:flex-row items-center gap-8">
-                    
+
                     {/* Founder Card - Updated with Name and Links */}
                     <div className="w-full md:w-1/3 text-center">
                         {/* Profile Picture */}
@@ -119,14 +119,14 @@ export default function AboutPage() {
 
                         {/* Contact Links */}
                         <div className="flex justify-center space-x-3 text-gray-600">
-                            <a 
+                            <a
                                 href="mailto:ayanafiledugasa@gmail.com" // <<< REPLACE with your actual email
                                 className="hover:text-[#2B61E3] transition-colors"
                                 aria-label="Email Ayana File Dugasa"
                             >
                                 <MailIcon />
                             </a>
-                            <a 
+                            <a
                                 href="https://www.linkedin.com/in/ayanaf/" // <<< REPLACE with your actual LinkedIn URL
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -141,11 +141,11 @@ export default function AboutPage() {
                     {/* Personal Story */}
                     <div className="w-full md:w-2/3 text-gray-700 text-base text-left space-y-3">
                         <p>
-                            "Like many of our users, I struggled with information overload. I had hundreds of bookmarks and scattered notes, but I couldn't remember <strong>why</strong> I saved any of it. That realization—that context is the key to lasting knowledge—was the spark for LinkJournal."
+                            "Like many of our users, I struggled with information overload. I had hundreds of bookmarks and scattered notes, but I couldn't remember <strong>why</strong> I saved any of it. That realization - that context is the key to lasting knowledge - was the spark for LinkJournal."
                         </p>
 
                         <p>
-                            "I built LinkJournal to solve my own problem first. This means the features—from the focus on reflection (description) to the powerful search (US-012)—are designed with genuine user-centricity. It’s a tool built by a learner, for learners."
+                            "I built LinkJournal to solve my own problem first. This means the features - from the focus on reflection (description) to the powerful search (US-012) - are designed with genuine user-centricity. It’s a tool built by a learner, for learners."
                         </p>
                     </div>
                 </div>
@@ -154,7 +154,7 @@ export default function AboutPage() {
             {/* ================= SECTION 4: DESIGN PHILOSOPHY ================= */}
             <section className="px-4 md:px-8 py-16 md:py-24">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                    
+
                     {/* Text Side */}
                     <div className="space-y-6">
                         <span className="text-xl font-extrabold text-[#C5A365] flex items-center gap-3">
@@ -180,7 +180,7 @@ export default function AboutPage() {
                             </ul>
                         </div>
                     </div>
-                    
+
                     {/* Image/Conceptual Side */}
                     <div className="w-full rounded-xl overflow-hidden shadow-2xl p-8 bg-white text-center">
                         <Focus className="w-10 h-10 text-[#2B61E3] mx-auto mb-3" />

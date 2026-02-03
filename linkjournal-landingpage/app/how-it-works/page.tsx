@@ -26,7 +26,7 @@ export default function HowItWorksPage() {
             {/* ================= STEP 1: CAPTURE AND ORGANIZE (US-005, US-004) - VIDEO EMBED ================= */}
             <section className="bg-white px-4 md:px-8 py-16 md:py-24 shadow-inner">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
-                    
+
                     {/* Text Side */}
                     <div className="space-y-6">
                         <span className="text-2xl font-extrabold text-[#C5A365] flex items-center gap-2">
@@ -104,7 +104,7 @@ export default function HowItWorksPage() {
                                     <span className="font-semibold">Flag Importance (US-008):</span> Use the star icon to instantly flag crucial links, making them accessible on the dedicated <span className="font-semibold">Important Journals Page (US-009)</span>.
                                 </li>
                                 <li>
-                                    <span className="font-semibold">Edit Anytime (US-010):</span> Click 'Edit' in the detail view to update the name, link, topic, or description—ensuring your information is always accurate.
+                                    <span className="font-semibold">Edit Anytime (US-010):</span> Click 'Edit' in the detail view to update the name, link, topic, or description - ensuring your information is always accurate.
                                 </li>
                                 <li>
                                     <span className="font-semibold">Delete When Needed (US-011):</span> Keep your archive clean by permanently removing outdated or irrelevant entries.
@@ -121,7 +121,7 @@ export default function HowItWorksPage() {
             {/* ================= STEP 3: RETRIEVE & FILTER (US-012, US-006) - VIDEO EMBED ================= */}
             <section className="bg-[#E4E9EC] px-4 md:px-8 py-16 md:py-24">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
-                    
+
                     {/* Text Side */}
                     <div className="space-y-6">
                         <span className="text-2xl font-extrabold text-[#C5A365] flex items-center gap-2">

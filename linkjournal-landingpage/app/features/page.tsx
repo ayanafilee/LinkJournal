@@ -72,7 +72,7 @@ export default function FeaturesPage() {
               <span className="text-[#2B61E3] font-bold">US-012:</span> Find anything, instantly.
             </p>
             <p>
-              Our powerful, intelligent search engine quickly indexes your entire archive—including the link name, the full description/reflection, and all associated topics. No more losing links!
+              Our powerful, intelligent search engine quickly indexes your entire archive - including the link name, the full description/reflection, and all associated topics. No more losing links!
             </p>
             <ul className="list-disc list-inside space-y-2 pl-4">
               <li>Keyword Search: Locate journals by any word used in the title or description.</li>

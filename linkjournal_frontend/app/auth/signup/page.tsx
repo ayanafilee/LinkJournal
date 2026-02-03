@@ -98,6 +98,9 @@ export default function SignupPage() {
   // --- Handler ---
   // --- OAuth Signup ---
   const handleOAuthSignup = async (providerName: 'google' | 'facebook') => {
+    if (loading) return;
+    setLoading(true);
+
     let provider;
     if (providerName === 'google') {
       provider = new GoogleAuthProvider();
@@ -109,10 +112,8 @@ export default function SignupPage() {
       provider.addScope('public_profile');
     }
 
-    // Call popup BEFORE state updates to ensure the browser recognizes it as a user gesture
     try {
       const result = await signInWithPopup(auth, provider);
-      setLoading(true); // Now start the loading state for the DB sync
       const user = result.user;
       console.log(`${providerName} user:`, user);
 
@@ -206,6 +207,17 @@ export default function SignupPage() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#F8F9FD] px-4 font-sans">
 
+      {/* Premium Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/70 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-6 text-lg font-bold text-gray-900 tracking-tight">Creating Your Archive...</p>
+            <p className="text-sm text-gray-500 font-medium">Sit tight, we're setting up your workspace</p>
+          </div>
+        </div>
+      )}
+
       {/* Toast Configuration */}
       <Toaster
         position="top-right"
@@ -219,11 +231,11 @@ export default function SignupPage() {
         }}
       />
 
-      <div className="w-full max-w-[500px] bg-white p-8 md:p-10 rounded-xl shadow-sm">
+      <div className="w-full max-w-[500px] bg-white p-8 md:p-10 rounded-xl shadow-sm border border-gray-100">
 
         {/* Header */}
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-8">
-          Sign up
+        <h1 className="text-3xl font-extrabold text-center text-blue-600 mb-8 tracking-tight">
+          Create Account
         </h1>
 
         {/* Name Fields */}
@@ -405,11 +417,11 @@ export default function SignupPage() {
         <div className="flex justify-center gap-4 mb-8">
           <button
             type="button"
-            onClick={() => handleOAuthSignup('facebook')}
-            className="w-12 h-12 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            aria-label="Sign up with Facebook"
+            className="w-12 h-12 flex items-center justify-center rounded-lg border border-gray-200 opacity-40 cursor-not-allowed bg-gray-50"
+            title="Facebook signup is currently unavailable"
+            disabled
           >
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="#1877F2" xmlns="http://www.w3.org/2000/svg">
+            <svg className="w-6 h-6 grayscale" viewBox="0 0 24 24" fill="#1877F2" xmlns="http://www.w3.org/2000/svg">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
           </button>
@@ -417,7 +429,8 @@ export default function SignupPage() {
           <button
             type="button"
             onClick={() => handleOAuthSignup('google')}
-            className="w-12 h-12 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            disabled={loading}
+            className={`w-12 h-12 flex items-center justify-center rounded-lg border border-gray-200 transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
             aria-label="Sign up with Google"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

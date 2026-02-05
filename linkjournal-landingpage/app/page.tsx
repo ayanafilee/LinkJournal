@@ -13,10 +13,10 @@ export default function LandingPage() {
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                         Save, Describe, and Organize the Links That Matter to You
                     </h1>
-                    <p className="text-gray-600 text-lg leading-relaxed max-w-lg">
+                    {/* <p className="text-gray-600 text-lg leading-relaxed max-w-lg">
                         LinkJournal helps you keep all your favorite web links in one organized place. Add descriptions, group them by topic, and mark the most important ones for quick access.<br />
                         Stay focused, save time, and never lose track of the resources that matter most to you.
-                    </p>
+                    </p> */}
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-4">
                         <Link href="https://link-journal-qbth.vercel.app/auth/signup" rel="noopener noreferrer">
